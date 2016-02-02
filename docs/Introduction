@@ -1,0 +1,8 @@
+In this project the main goal is to determine the performance characteristics of underlying hardware components. 
+Understanding about the performance of the basic operations, which would be valuable in identifying performance bottlenecks. 
+The project discusses set of metrics which can be used to evaluate the performance of certain features of an Operating System.
+ 
+Language used for calculating the metrics is “C” with the compiler  NUMBER and Python.
+
+The first phase of the project (machine description, CPU, Scheduling, and OS Services) was completed in an estimated time of 
+8 hours per head totalling to 24 hours. We estimate that the remaining project would take 32 hours more per head.
