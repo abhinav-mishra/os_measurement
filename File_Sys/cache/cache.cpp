@@ -94,7 +94,7 @@ int main(int argc, const char* argv[])
 	//1.5GB file cache = 1500MB cache = 1536000 KB
 	//start from 50KB
 	cout << "size (MB)  " << "Time in ms"<< endl;
-	for(sizeOfFile = 1; sizeOfFile < 2500000; sizeOfFile=sizeOfFile*2) //this is all in KB
+	for(sizeOfFile = 1638400; sizeOfFile < 2500000; sizeOfFile=sizeOfFile*2) //this is all in KB
 	{
 		long long int converted_size = sizeOfFile*MBtoKB;
 		create(converted_size, created_file);
