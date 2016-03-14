@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#define ITERATIONS 100
+#define ITERATIONS 50000
 #define STACK_SIZE (1024 * 1024)
 
 struct timespec time_start,time_end,time_taken;
