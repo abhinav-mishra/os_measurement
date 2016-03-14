@@ -122,13 +122,23 @@ int main(int argc, const char* argv[])
 	//1.5GB file cache = 1500MB cache = 1536000 KB
 	//start from 50KB
 	cout << "size (KB)  " << "Time (ms)"<< endl;
-	for(fileSize = 50; fileSize < 3000000; fileSize=fileSize*2) //this is all in KB
+	for(fileSize = 50; fileSize < 60; fileSize=fileSize*2) //this is all in KB
 	{
 		long long int converted_size = fileSize*conversion;
 		makeFile(converted_size, testFileName);
 		long long int answer = test_file_cache(testFileName);
 		// cout << "read time for " << fileSize <<"KB file : " << endl;
 		cout << fileSize << "          " << answer << endl; //this time is printed in ms
+	}
+	int j=1000;
+	for(fileSize = j*1024; fileSize < 30000000; fileSize=j*1024) //this is all in KB
+	{
+		long long int converted_size = fileSize*conversion;
+		makeFile(converted_size, testFileName);
+		long long int answer = test_file_cache(testFileName);
+		// cout << "read time for " << fileSize <<"KB file : " << endl;
+		cout << fileSize << "          " << answer << endl; //this time is printed in ms
+	j=j+200;
 	}
 	
 }
