@@ -22,21 +22,24 @@ int return_time_cache(string &filename) {
 	if (inStreamFile.is_open()) {
 		string line;
 		tick1 = getticks();
-		
+		while(getline(inStreamFile, line))
+		{
+		i++;
+		}
 		
 
 
-	for(j = 0; j<no_Of_Iterations; j++)
+	/*for(j = 0; j<no_Of_Iterations; j++)
 		{
 			getline(inStreamFile, line);
-		}
+		}*/
 		tick2 = getticks();
 		inStreamFile.close();
 	}
 	total_time_elapsed = elapsed(tick2,tick1);
 
 	tick1overhead = getticks();
-	for(j = 0; j<no_Of_Iterations; j+=0)
+	for(j = 0; j<i; j+=0)
 	{
 		j++;
 	}
