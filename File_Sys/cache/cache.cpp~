@@ -23,29 +23,36 @@ int return_time_cache(string &filename) {
 		string line;
 		tick1 = getticks();
 		
-		
+	while(getline(inStreamFile, line))
+		i++;
+	cout<<"size is"<< i<< "             ";
 
-
+/*
 	for(j = 0; j<no_Of_Iterations; j++)
 		{
 			getline(inStreamFile, line);
-		}
+		}*/
 		tick2 = getticks();
 		inStreamFile.close();
 	}
 	total_time_elapsed = elapsed(tick2,tick1);
 
 	tick1overhead = getticks();
-	for(j = 0; j<no_Of_Iterations; j+=0)
+	for(j = 0; j<i; j+=0)
 	{
 		j++;
-	}
+	}	
+
+	/*for(j = 0; j<no_Of_Iterations; j+=0)
+	{
+		j++;
+	}*/
 	tick2overhead = getticks();
 	overhead = elapsed(tick2overhead,tick1overhead);
 	
-	return ((total_time_elapsed-overhead));
+	//return ((total_time_elapsed-overhead));
 
-	//return ((total_time_elapsed-overhead)*0.47);
+	return ((total_time_elapsed-overhead)/1000);
 }
 
 
@@ -86,13 +93,13 @@ int main(int argc, const char* argv[])
 	int sizeOfFile;
 	//1.5GB file cache = 1500MB cache = 1536000 KB
 	//start from 50KB
-	cout << "size (KB)  " << "Time in ms"<< endl;
+	cout << "size (MB)  " << "Time in ms"<< endl;
 	for(sizeOfFile = 1; sizeOfFile < 2500000; sizeOfFile=sizeOfFile*2) //this is all in KB
 	{
 		long long int converted_size = sizeOfFile*MBtoKB;
 		create(converted_size, created_file);
 		long long int answer = return_time_cache(created_file);
-		cout << sizeOfFile << "			" << answer << endl; 
+		cout << sizeOfFile << "	aaaaa		" << answer << endl; 
 	}
 	
 }
