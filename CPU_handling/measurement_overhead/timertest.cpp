@@ -77,12 +77,13 @@ void inline GetElapsedTime(uint64_t *times) {
                      : "=r" (cycles_high), "=r" (cycles_low)::"%rax", "%rbx", "%rcx", "%rdx"
                      );
 
-        /*********************************************
-         * Code to be benchmarked goes here
-         *********************************************/
+        
+                     for (int i=0;i<202;i++){
+                       i=i+1;  
+                     }
+                     
 
-        // No code because we are measuring only the 
-        // timing overhead
+        
 
         asm volatile (
                      "RDTSCP\n\t"
