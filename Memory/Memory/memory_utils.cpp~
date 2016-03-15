@@ -21,19 +21,31 @@ void process_mem_usage(double& vm_usage, double& resident_set, long& page_size_k
 
 	vm_usage = 0.0;
 	resident_set = 0.0;
+
+	// 'file' stat seems to give the most reliable results
+	//
 	ifstream stat_stream("/proc/self/stat", ios_base::in);
+
+	// dummy vars for leading entries in stat that we don't care about
+	//
 	string pid, comm, state, ppid, pgrp, session, tty_nr;
 	string tpgid, flags, minflt, cminflt, majflt, cmajflt;
 	string utime, stime, cutime, cstime, priority, nice;
 	string O, itrealvalue, starttime;
+
+	// the two fields we want
+	//
 	unsigned long vsize;
 	long rss;
+
 	stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
 			>> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt >> utime
 			>> stime >> cutime >> cstime >> priority >> nice >> O >> itrealvalue
-			>> starttime >> vsize >> rss;
+			>> starttime >> vsize >> rss; // don't care about the rest
+
 	stat_stream.close();
-	page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024;
+
+	page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
 	vm_usage = vsize / 1024.0;
 	resident_set = rss * page_size_kb;
 }
@@ -45,16 +57,22 @@ unsigned int write_megabyte(char ***mallocs_ptr, unsigned int numMegaBytes, FILE
 	long page_size;
 	struct timespec ts_start,ts_end,test_of_time;
 	long unsigned time_taken;
+
 	*mallocs_ptr = (char**) malloc(sizeof(char*) * numMegaBytes);
 	unsigned int i,j,reached = 0;
 	for (i = 0; i < numMegaBytes; i++) {
 		void* p = malloc(sizeof(char) * MEGABYTE);
 		if (!p) {
-			printf("No more memory available! Memory allocated up to now : %i megabytes.\n",i);
+			printf(
+					"No more memory available! Memory allocated up to now : %i megabytes.\n",
+					i);
 			reached = i;
 			break;
 		}
 		(*mallocs_ptr)[i] = (char*) p;
+
+		//Now fill in the malloc with some data, which forces the OS
+		//to have this data in memory.
 		clock_gettime(CLOCK_REALTIME,&ts_start);	
 		
 		strcpy((*mallocs_ptr)[i],ONE_KB_STRING);
@@ -64,6 +82,8 @@ unsigned int write_megabyte(char ***mallocs_ptr, unsigned int numMegaBytes, FILE
 		clock_gettime(CLOCK_REALTIME,&ts_end);	
 		test_of_time = diff(ts_start,ts_end);
 		time_taken = test_of_time.tv_nsec;
+		
+		//Collect data
 		if (file != NULL) {
 		    process_mem_usage(vm, rss, page_size);
 		    cout << "Allocated : " << i+1 << "MB; VM: " << vm << "kB; RAM: " << rss << "kB;";
@@ -94,10 +114,12 @@ void read_all_memory(char ***mallocs_ptr, unsigned int numMegaBytes, FILE* file)
 	unsigned int i;
 	for (i = 0 ; i < numMegaBytes; i++) {
 		clock_gettime(CLOCK_REALTIME,&ts_start);	
-		memcpy(retrieve,(*mallocs_ptr)[i],1024);
+		memcpy(retrieve,(*mallocs_ptr)[i],1024); // Copy part of the string at mallocs[i]
 	    clock_gettime(CLOCK_REALTIME,&ts_end);	
 	    test_of_time = diff(ts_start,ts_end);
 	    time_taken = test_of_time.tv_nsec;
+	    
+		//Collect data
 	    process_mem_usage(vm, rss, page_size);
 	    cout << "Read : " << numMegaBytes << "kB; VM: " << vm << "kB; RAM: " << rss << "kB;";
 	    cout << " RAM PageSize:" << page_size << "kB; Latency: " << time_taken << " nanoseconds;"<< endl;
@@ -114,12 +136,14 @@ void mmap_array(int* &mmapped_array, unsigned int size, char* filename) {
 	    perror("Error opening file for writing");
 	    exit(EXIT_FAILURE);
     }
+	//Strectches file size to size of int array.
     result = lseek(fd, size-1, SEEK_SET);
     if (result == -1) {
 	    close(fd);
 	    perror("Error calling lseek() to 'stretch' the file");
 	    exit(EXIT_FAILURE);
     }
+    //Necessary after using lseek.
     result = write(fd, "", 1);
     if (result != 1) {
 	    close(fd);
@@ -138,12 +162,15 @@ void mmap_array(int* &mmapped_array, unsigned int size, char* filename) {
 }
 
 void free_mmapped_array(int* mmapped_array, unsigned int size) {
+    /* Don't forget to free the mmapped memory
+     */
     if (munmap(mmapped_array, size) == -1) {
 		perror("Error un-mmapping the file");
 		exit(EXIT_FAILURE);
     }
 }
 
+//DEPRECATED
 void make_list(node **root_ptr, unsigned int size, FILE* file) {
 	using std::cout;
 	using std::endl;
@@ -176,7 +203,8 @@ void make_list(node **root_ptr, unsigned int size, FILE* file) {
 
 	test_of_time = diff(ts_start,ts_end);
 	time_taken = test_of_time.tv_nsec;
-
+	
+	//Collect data
 	if (profile) {
 	    process_mem_usage(vm, rss, page_size);
 	    cout << "List size: " << size << "; VM: " << vm << "kB; RAM: " << rss << "kB;";
@@ -187,6 +215,7 @@ void make_list(node **root_ptr, unsigned int size, FILE* file) {
 	}
 }
 
+//DEPRECATED
 void read_list_wrap(node **root_ptr, unsigned int iter, FILE* file) {
 	using std::cout;
 	using std::endl;
