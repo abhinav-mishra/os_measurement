@@ -22,10 +22,10 @@ using namespace std;
 #define ITERATIONS 10
 #define BLOCK_SIZE 4096
 
-const int Thread = 10;
-const char *fname= "f";
-const int f_size = 1024*1024*8; 
-char* filename_array[Thread];
+const int MAX_THREAD = 10;
+const char *FNAME_PREFIX= "f";
+const int FILE_SIZE = 1024*1024*8; //1MB file
+char* filename_array[MAX_THREAD];
 
 int file_name_counter = 0;
 double total_time_thread = 0.0;
@@ -46,7 +46,7 @@ void create(long long int size, char* filename)
   int x;
   for(x = 0; x<size; x++)
   {
-    array[x] = 'z';
+    array[x] = 'a';
   }
 
   ofstream outstream_File;
@@ -69,7 +69,7 @@ int seq_read(long long int size, char* filename) {
   ticks tick1, tick2;
   long long int totalTimeElapsed;
   int fd;
-  char* buffer; 
+  char* buffer; //= new char[size];
   int page = getpagesize();
 
   posix_memalign((void**) &buffer, page, size);
@@ -87,8 +87,9 @@ int seq_read(long long int size, char* filename) {
       return -1;
     }
 
-
-    totalTimeElapsed = ((elapsed(tick2,tick1) )*0.417)/ITERATIONS; 
+    //depending on the size of the file, you may need to change this
+    //so that it doesn't give stack overflow
+    totalTimeElapsed = ((elapsed(tick2,tick1) - 45)*0.417)/ITERATIONS; 
   }
   else
   {
@@ -105,17 +106,22 @@ int seq_read(long long int size, char* filename) {
 
 void *run_readfile(void *ptr)
 {
-  
+  //sequential access
   long long int stotal;
+
+  //cout << "size (KB)  " << "Time/block (ns) S " << "Time/byte (ns) R "<< endl;
+  //change the numbers here to get more size stuff
+
   int i;
   stotal = 0;
-  long long int converted_size = f_size;
+  long long int converted_size = FILE_SIZE;
   for(i = 0; i < ITERATIONS; i++)
   {
     long long int sAnswer = seq_read(converted_size, (char*)ptr);
     stotal += sAnswer;
   }
-   long long int sFinal = (stotal)/converted_size*((long) BLOCK_SIZE)/((long) sizeof(char));
+  //long long int bytePerBlock = ((long) BLOCK_SIZE)/((long) sizeof(char));
+  long long int sFinal = (stotal)/converted_size*((long) BLOCK_SIZE)/((long) sizeof(char));
 
   pthread_mutex_lock(&thread_mutex);
   total_time_thread += sFinal;
@@ -123,7 +129,7 @@ void *run_readfile(void *ptr)
 }
 
 double create_process(int no_threads){
-  pthread_t thread_id[Thread];
+  pthread_t thread_id[MAX_THREAD];
   total_time_thread = 0.0;
   int i,j;
 
@@ -138,14 +144,14 @@ double create_process(int no_threads){
 
 int main(int argc, const char* argv[]){
   int k;
-  for(k = 0 ; k < Thread; k ++){
+  for(k = 0 ; k < MAX_THREAD; k ++){
     char buffer[10];
     sprintf(buffer, "%d", file_name_counter);
     filename_array[k] = new char[50];
     strcpy(filename_array[k], FNAME_PREFIX);
     strcat(filename_array[k], buffer);
     file_name_counter ++;
-    create(f_size, filename_array[k]);
+    create(FILE_SIZE, filename_array[k]);
   }
 cout << create_process(0) << endl;
 cout << create_process(1) << endl;
@@ -159,7 +165,7 @@ cout << create_process(1) << endl;
   cout << create_process(9) << endl;
   cout << create_process(10) << endl;
 
-  for(k = 0 ; k < Thread; k ++){
+  for(k = 0 ; k < MAX_THREAD; k ++){
     delete[] filename_array[k];
   }
   exit(0);
